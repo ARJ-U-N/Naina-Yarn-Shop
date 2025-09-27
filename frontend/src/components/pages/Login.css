@@ -1,0 +1,297 @@
+.login-page {
+  padding: 80px 0;
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+}
+
+.login-container {
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.login-title {
+  font-size: 32px;
+  font-weight: normal;
+  margin-bottom: 40px;
+  color: #333;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  text-align: left;
+}
+
+.form-input {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #007acc;
+}
+
+.form-input::placeholder {
+  color: #999;
+}
+
+.forgot-password {
+  text-align: left;
+  margin-top: -10px;
+}
+
+.forgot-link {
+  color: #666;
+  text-decoration: underline;
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+
+.forgot-link:hover {
+  color: #333;
+}
+
+.signin-btn {
+  background: #d4af37;
+  color: white;
+  border: none;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin-top: 10px;
+}
+
+.signin-btn:hover:not(:disabled) {
+  background: #c19b26;
+}
+
+.signin-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.create-account {
+  margin-top: 10px;
+}
+
+.create-account-link {
+  color: #666;
+  text-decoration: underline;
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+
+.create-account-link:hover {
+  color: #333;
+}
+
+/* Mobile responsive */
+@media (max-width: 767px) {
+  .login-page {
+    padding: 40px 0;
+  }
+  
+  .login-container {
+    padding: 0 20px;
+  }
+  
+  .login-title {
+    font-size: 28px;
+    margin-bottom: 30px;
+  }
+}
+.login-page {
+  min-height: calc(100vh - 160px); /* Account for header and footer */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  background-color: #fafafa;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 400px;
+  padding: 0 20px;
+}
+
+.login-title {
+  font-size: 32px;
+  font-weight: 300;
+  margin: 0 0 48px 0;
+  color: #333;
+  text-align: center;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background: white;
+  padding: 0;
+  border-radius: 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-input {
+  width: 100%;
+  padding: 16px 12px;
+  border: 1px solid #ddd;
+  border-radius: 0;
+  font-size: 16px;
+  background: white;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #333;
+}
+
+.form-input::placeholder {
+  color: #999;
+  font-size: 16px;
+}
+
+.forgot-password {
+  margin: -8px 0 8px 0;
+}
+
+.forgot-link {
+  color: #666;
+  text-decoration: underline;
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+
+.forgot-link:hover {
+  color: #333;
+}
+
+.signin-btn {
+  background: #d4af37;
+  color: white;
+  border: none;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-family: inherit;
+  width: 100%;
+  margin: 8px 0;
+}
+
+.signin-btn:hover:not(:disabled) {
+  background: #c19b26;
+}
+
+.signin-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.create-account {
+  margin-top: 8px;
+  text-align: center;
+}
+
+.create-account-link {
+  color: #666;
+  text-decoration: underline;
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+
+.create-account-link:hover {
+  color: #333;
+}
+
+/* Mobile responsive */
+@media (max-width: 767px) {
+  .login-page {
+    min-height: calc(100vh - 120px);
+    padding: 20px 0;
+  }
+  
+  .login-container {
+    padding: 0 16px;
+    max-width: 100%;
+  }
+  
+  .login-title {
+    font-size: 28px;
+    margin-bottom: 32px;
+  }
+  
+  .form-input {
+    padding: 14px 12px;
+    font-size: 16px;
+  }
+  
+  .signin-btn {
+    padding: 14px 20px;
+  }
+}
+
+/* Ensure proper layout on larger screens */
+@media (min-width: 768px) {
+  .login-page {
+    padding: 80px 0;
+  }
+  
+  .login-container {
+    max-width: 400px;
+  }
+}
+/* Add to your existing Login.css */
+
+.error-message {
+  background: #fee;
+  color: #c33;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  border: 1px solid #fcc;
+  font-size: 14px;
+}
+
+.demo-credentials {
+  margin-top: 30px;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 4px;
+  font-size: 14px;
+  text-align: left;
+}
+
+.demo-credentials p {
+  margin: 8px 0;
+  color: #666;
+}
+
+.demo-credentials strong {
+  color: #333;
+}

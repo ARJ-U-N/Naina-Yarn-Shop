@@ -1,0 +1,64 @@
+/* Admin Layout */
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  overflow: hidden;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-left: 0;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (min-width: 1024px) {
+  .main-content {
+    margin-left: 16rem; /* Sidebar width */
+  }
+}
+
+/* Content Area */
+.content-area {
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: transparent;
+  padding: 0;
+}
+
+/* Content Wrapper */
+.content-wrapper {
+  max-width: none;
+  margin: 0;
+  padding: 2rem;
+  min-height: calc(100vh - 4rem); /* Account for header */
+}
+
+@media (max-width: 768px) {
+  .content-wrapper {
+    padding: 1rem;
+  }
+}
+
+/* Scrollbar Styling */
+.content-area::-webkit-scrollbar {
+  width: 6px;
+}
+
+.content-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.content-area::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 3px;
+}
+
+.content-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
