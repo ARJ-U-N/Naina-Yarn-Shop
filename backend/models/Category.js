@@ -12,7 +12,6 @@ const categorySchema = new mongoose.Schema({
     type: String,
     unique: true,
     lowercase: true
-    // Remove required: true since we'll generate it automatically
   },
   description: {
     type: String,
@@ -20,6 +19,18 @@ const categorySchema = new mongoose.Schema({
   },
   image: {
     type: String,
+    default: null
+  },
+  // ✅ NEW: Track if image was set automatically
+  imageSource: {
+    type: String,
+    enum: ['manual', 'auto-from-product'],
+    default: 'manual'
+  },
+  // ✅ NEW: Track which product provided the image
+  imageFromProduct: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product',
     default: null
   },
   isActive: {
@@ -32,16 +43,55 @@ const categorySchema = new mongoose.Schema({
 
 // Generate slug from name before saving
 categorySchema.pre('save', function(next) {
-  // Always generate slug from name, whether it's new or modified
   if (this.name) {
     this.slug = this.name
       .toLowerCase()
-      .replace(/[^a-zA-Z0-9\s]/g, '') // Remove special characters
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/-+/g, '-') // Replace multiple hyphens with single
-      .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+      .replace(/[^a-zA-Z0-9\s]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
   }
   next();
 });
+
+// ✅ NEW: Method to update category image from product
+categorySchema.methods.updateImageFromProduct = async function(productId, imageUrl) {
+  // Only update if no manual image is set
+  if (!this.image || this.imageSource === 'auto-from-product') {
+    this.image = imageUrl;
+    this.imageSource = 'auto-from-product';
+    this.imageFromProduct = productId;
+    await this.save();
+    return true;
+  }
+  return false;
+};
+
+// ✅ NEW: Method to remove auto image if product is deleted
+categorySchema.methods.handleProductDeletion = async function(productId) {
+  if (this.imageFromProduct && this.imageFromProduct.toString() === productId.toString()) {
+    // Find next product in this category to get image from
+    const Product = mongoose.model('Product');
+    const nextProduct = await Product.findOne({
+      category: this._id,
+      isActive: true,
+      _id: { $ne: productId }
+    }).sort({ createdAt: 1 });
+
+    if (nextProduct && nextProduct.images && nextProduct.images.length > 0) {
+      this.image = nextProduct.images[0].url;
+      this.imageFromProduct = nextProduct._id;
+      await this.save();
+    } else {
+      // No more products, remove auto image
+      if (this.imageSource === 'auto-from-product') {
+        this.image = null;
+        this.imageSource = 'manual';
+        this.imageFromProduct = null;
+        await this.save();
+      }
+    }
+  }
+};
 
 module.exports = mongoose.model('Category', categorySchema);

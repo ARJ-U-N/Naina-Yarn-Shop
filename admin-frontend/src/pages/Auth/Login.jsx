@@ -50,7 +50,7 @@ const Login = () => {
             </div>
           </div>
           <h2 className="text-3xl font-bold text-gray-900">
-            Nayher Admin Panel
+            Naina Admin Panel
           </h2>
           <p className="mt-2 text-gray-600">
             Sign in to manage your e-commerce store
@@ -145,7 +145,7 @@ const Login = () => {
         {/* Footer */}
         <div className="text-center mt-6">
           <p className="text-sm text-gray-500">
-            © 2025 Nayher. All rights reserved.
+            © 2025 Naina. All rights reserved.
           </p>
         </div>
       </div>

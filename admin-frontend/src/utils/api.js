@@ -13,7 +13,6 @@ class ApiClient {
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`
     
-    // Add debug logging to see what URL is being called
     console.log('🌐 API Request:', url)
     
     const config = {
@@ -33,9 +32,10 @@ class ApiClient {
         throw new Error(data.message || `HTTP error! status: ${response.status}`)
       }
 
+      console.log('✅ API Response:', data)
       return data
     } catch (error) {
-      console.error(`API request failed: ${endpoint}`, error)
+      console.error(`❌ API request failed: ${endpoint}`, error)
       console.error('Full URL:', url)
       throw error
     }
@@ -70,19 +70,41 @@ class ApiClient {
     })
   }
 
-  // ✅ Upload API - NOW INSIDE THE CLASS
+  // File upload method (separate from regular requests)
+  async uploadFile(endpoint, formData) {
+    const url = `${this.baseURL}${endpoint}`
+    
+    console.log('📤 File upload to:', url)
+    console.log('📄 FormData entries:', [...formData.entries()])
+    
+    const config = {
+      method: 'POST',
+      headers: {
+        ...this.getAuthHeaders()
+        // Don't set Content-Type for FormData - browser will set it with boundary
+      },
+      body: formData
+    }
+
+    try {
+      const response = await fetch(url, config)
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || `HTTP error! status: ${response.status}`)
+      }
+
+      console.log('✅ Upload successful:', data)
+      return data
+    } catch (error) {
+      console.error(`❌ Upload failed: ${endpoint}`, error)
+      throw error
+    }
+  }
+
+  // Upload API
   upload = {
-    images: (formData) => {
-      // For FormData, we need to remove Content-Type header
-      const headers = this.getAuthHeaders();
-      delete headers['Content-Type']; // Let browser set it with boundary
-      
-      return this.request('/upload/images', {
-        method: 'POST',
-        headers,
-        body: formData, // FormData object, not JSON
-      });
-    },
+    images: (formData) => this.uploadFile('/upload/images', formData),
     deleteImage: (filename) => this.delete(`/upload/images/${filename}`),
   }
 
@@ -114,9 +136,13 @@ class ApiClient {
   categories = {
     getAll: () => this.get('/categories'),
     getBySlug: (slug) => this.get(`/categories/${slug}`),
+    getById: (id) => this.get(`/categories/${id}`),
     create: (categoryData) => this.post('/categories', categoryData),
     update: (id, categoryData) => this.put(`/categories/${id}`, categoryData),
     delete: (id) => this.delete(`/categories/${id}`),
+    
+    // Image upload method
+    uploadImage: (formData) => this.uploadFile('/categories/upload-image', formData),
   }
 
   // Reviews API

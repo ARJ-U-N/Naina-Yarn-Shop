@@ -117,14 +117,17 @@ exports.getProduct = async (req, res) => {
   }
 };
 
+// ✅ UPDATED: Create product with category image logic
 // @desc    Create product
 // @route   POST /api/products
 // @access  Private/Admin
 exports.createProduct = async (req, res) => {
   try {
-   const product = await Product.create(req.body);
-
+    const product = await Product.create(req.body);
     await product.populate('category', 'name slug');
+
+    // ✅ NEW: Update category image if this is the first product
+    await updateCategoryImageFromProduct(product);
 
     res.status(201).json({
       success: true,
@@ -140,6 +143,7 @@ exports.createProduct = async (req, res) => {
   }
 };
 
+// ✅ UPDATED: Update product with category image logic
 // @desc    Update product
 // @route   PUT /api/products/:id
 // @access  Private/Admin
@@ -154,11 +158,18 @@ exports.updateProduct = async (req, res) => {
       });
     }
 
+    // Store old data for comparison
+    const oldCategoryId = product.category.toString();
+    const oldImages = product.images;
+
     product = await Product.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     ).populate('category', 'name slug');
+
+    // ✅ NEW: Handle category image updates
+    await handleProductUpdate(product, oldCategoryId, oldImages);
 
     res.json({
       success: true,
@@ -174,6 +185,7 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
+// ✅ UPDATED: Delete product with category image cleanup
 // @desc    Delete product
 // @route   DELETE /api/products/:id
 // @access  Private/Admin
@@ -186,6 +198,12 @@ exports.deleteProduct = async (req, res) => {
         success: false,
         message: 'Product not found'
       });
+    }
+
+    // ✅ NEW: Handle category image cleanup before deletion
+    const category = await Category.findById(product.category);
+    if (category) {
+      await category.handleProductDeletion(product._id);
     }
 
     // Soft delete - just mark as inactive
@@ -260,3 +278,59 @@ exports.getProductsByCategory = async (req, res) => {
     });
   }
 };
+
+// ✅ NEW: Helper function to update category image from new product
+async function updateCategoryImageFromProduct(product) {
+  try {
+    if (product.images && product.images.length > 0) {
+      const category = await Category.findById(product.category);
+      if (category) {
+        await category.updateImageFromProduct(product._id, product.images[0].url);
+        console.log(`✅ Updated category "${category.name}" image from product "${product.name}"`);
+      }
+    }
+  } catch (error) {
+    console.error('Error updating category image:', error);
+  }
+}
+
+// ✅ NEW: Helper function to handle product updates
+async function handleProductUpdate(updatedProduct, oldCategoryId, oldImages) {
+  try {
+    const newCategoryId = updatedProduct.category._id.toString();
+    const newImages = updatedProduct.images;
+
+    // Check if category changed
+    if (oldCategoryId !== newCategoryId) {
+      // Handle old category - might need new image
+      const oldCategory = await Category.findById(oldCategoryId);
+      if (oldCategory && oldCategory.imageFromProduct && 
+          oldCategory.imageFromProduct.toString() === updatedProduct._id.toString()) {
+        await oldCategory.handleProductDeletion(updatedProduct._id);
+      }
+
+      // Handle new category - update with this product's image
+      if (newImages && newImages.length > 0) {
+        await updateCategoryImageFromProduct(updatedProduct);
+      }
+    } else {
+      // Same category, check if image changed
+      const imageChanged = !oldImages || oldImages.length === 0 || 
+                          !newImages || newImages.length === 0 || 
+                          oldImages[0]?.url !== newImages[0]?.url;
+
+      if (imageChanged && newImages && newImages.length > 0) {
+        const category = await Category.findById(newCategoryId);
+        if (category && category.imageFromProduct && 
+            category.imageFromProduct.toString() === updatedProduct._id.toString()) {
+          // This product's image is used for category, update it
+          category.image = newImages[0].url;
+          await category.save();
+          console.log(`✅ Updated category "${category.name}" image from updated product`);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error handling product update:', error);
+  }
+}
