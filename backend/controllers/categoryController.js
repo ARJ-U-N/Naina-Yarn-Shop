@@ -1,32 +1,20 @@
 const Category = require('../models/Category');
 const Product = require('../models/Product');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
 
 // ===================================
-// MULTER CONFIGURATION FOR IMAGE UPLOAD
+// CLOUDINARY CONFIGURATION FOR IMAGE UPLOAD
 // ===================================
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '..', 'uploads', 'categories');
-    
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-      console.log('📁 Created uploads/categories directory');
-    }
-    
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const filename = `category-${uniqueSuffix}${path.extname(file.originalname)}`;
-    console.log('📄 Generated filename:', filename);
-    cb(null, filename);
-  }
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+// Use memory storage instead of disk storage
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage,
@@ -74,14 +62,37 @@ exports.handleImageUpload = async (req, res) => {
       });
     }
 
-    // Create the image URL path
-    const imageUrl = `/uploads/categories/${req.file.filename}`;
+    // Upload directly to Cloudinary using buffer
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'nayher-categories',
+          public_id: `category-${Date.now()}-${Math.round(Math.random() * 1E9)}`,
+          transformation: [
+            { width: 800, height: 800, crop: 'limit', quality: 'auto' }
+          ]
+        },
+        (error, result) => {
+          if (error) {
+            console.error('❌ Cloudinary upload error:', error);
+            reject(error);
+          } else {
+            console.log('✅ Cloudinary upload success:', result.secure_url);
+            resolve(result);
+          }
+        }
+      );
+
+      // Send the buffer to Cloudinary
+      uploadStream.end(req.file.buffer);
+    });
+
+    const imageUrl = result.secure_url;
     
-    console.log('✅ Image uploaded successfully:', {
-      filename: req.file.filename,
+    console.log('✅ Image uploaded successfully to Cloudinary:', {
       originalName: req.file.originalname,
-      size: req.file.size,
-      url: imageUrl
+      url: imageUrl,
+      cloudinaryId: result.public_id
     });
     
     res.json({
@@ -90,8 +101,8 @@ exports.handleImageUpload = async (req, res) => {
       data: {
         imageUrl,
         originalName: req.file.originalname,
-        size: req.file.size,
-        filename: req.file.filename
+        cloudinaryId: result.public_id,
+        size: req.file.size
       }
     });
   } catch (error) {
@@ -303,16 +314,21 @@ exports.deleteCategory = async (req, res) => {
       });
     }
 
-    // Delete category image file if it exists and is manual
-    if (category.image && category.imageSource === 'manual' && category.image.startsWith('/uploads/categories/')) {
-      const imagePath = path.join(__dirname, '..', category.image);
-      if (fs.existsSync(imagePath)) {
-        try {
-          fs.unlinkSync(imagePath);
-          console.log('🗑️ Deleted image file:', imagePath);
-        } catch (fileError) {
-          console.log('⚠️ Could not delete image file:', fileError.message);
+    // Delete from Cloudinary if image exists
+    if (category.image && category.imageSource === 'manual') {
+      try {
+        // Extract public_id from Cloudinary URL
+        if (category.image.includes('cloudinary.com')) {
+          const urlParts = category.image.split('/');
+          const fileNameWithExt = urlParts[urlParts.length - 1];
+          const publicId = `nayher-categories/${fileNameWithExt.split('.')[0]}`;
+          
+          await cloudinary.uploader.destroy(publicId);
+          console.log('🗑️ Deleted image from Cloudinary:', publicId);
         }
+      } catch (cloudinaryError) {
+        console.log('⚠️ Could not delete image from Cloudinary:', cloudinaryError.message);
+        // Continue with category deletion even if image deletion fails
       }
     }
 
