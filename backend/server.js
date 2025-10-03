@@ -63,14 +63,6 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Health check endpoint (FIRST - for testing)
-app.get('/', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Nayher API is running',
-    timestamp: new Date().toISOString()
-  });
-});
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({
