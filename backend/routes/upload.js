@@ -2,30 +2,19 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
 const { protect } = require('../middleware/auth');
 const router = express.Router();
 
-// Configure multer
-const uploadDir = 'uploads/products';
-if (!fs.existsSync('uploads')) {
-  fs.mkdirSync('uploads');
-  console.log('📁 Created uploads directory');
-}
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-  console.log('📁 Created products directory');
-}
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    cb(null, `product-${uniqueSuffix}${ext}`);
-  }
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+// Configure multer for memory storage
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   console.log('🔍 Checking file:', file.originalname, file.mimetype);
@@ -61,17 +50,40 @@ router.post('/images', protect, upload.array('images', 5), async (req, res) => {
       });
     }
 
-    // ✅ PERMANENT FIX: Generate relative URLs (no domain)
-    const uploadedImages = req.files.map(file => ({
-      url: `/uploads/products/${file.filename}`, // ✅ Changed this line!
-      alt: path.parse(file.originalname).name,
-      filename: file.filename,
-      size: file.size,
-      mimetype: file.mimetype
-    }));
+   
+    const uploadPromises = req.files.map((file) => {
+      return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'products',
+            public_id: `product-${Date.now()}-${Math.round(Math.random() * 1E9)}`,
+            resource_type: 'image',
+          },
+          (error, result) => {
+            if (error) {
+              console.error('❌ Cloudinary upload error:', error);
+              reject(error);
+            } else {
+              console.log('✅ Cloudinary upload success:', result.secure_url);
+              resolve({
+                url: result.secure_url,
+                public_id: result.public_id,
+                alt: path.parse(file.originalname).name,
+                filename: result.public_id,
+                size: file.size,
+                mimetype: file.mimetype,
+              });
+            }
+          }
+        );
+        uploadStream.end(file.buffer);
+      });
+    });
+
+    const uploadedImages = await Promise.all(uploadPromises);
 
     console.log('✅ Images processed:', uploadedImages.length);
-    console.log('🔗 Sample URL:', uploadedImages[0]?.url); // Will now show: /uploads/products/...
+    console.log('🔗 Sample URL:', uploadedImages[0]?.url);
 
     res.status(200).json({
       success: true,
@@ -94,12 +106,10 @@ router.post('/images', protect, upload.array('images', 5), async (req, res) => {
 router.delete('/images/:filename', protect, async (req, res) => {
   try {
     const { filename } = req.params;
-    const filePath = path.join(__dirname, '../uploads/products', filename);
 
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-      console.log('🗑️ Image deleted:', filename);
-    }
+    
+    const result = await cloudinary.uploader.destroy(filename);
+    console.log('🗑️ Image deleted from Cloudinary:', filename, result);
 
     res.status(200).json({
       success: true,
