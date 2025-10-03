@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 require('dotenv').config();
 
 // Route imports
@@ -89,20 +90,20 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/upload', uploadRoutes);
 
+
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+});
+
 // Global error handler
 app.use((error, req, res, next) => {
   console.error('❌ Global Error:', error);
   res.status(error.statusCode || 500).json({
     success: false,
     message: error.message || 'Internal Server Error'
-  });
-});
-
-// ✅ FIXED: Handle 404 routes using app.all() instead of app.use()
-app.use('/{*catchAll}', (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found'
   });
 });
 
