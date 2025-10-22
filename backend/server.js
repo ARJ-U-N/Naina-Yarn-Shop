@@ -81,7 +81,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/upload', uploadRoutes);
-app.use('/api/checkout', checkoutRoutes);
+app.use('/api/checkout', checkoutRoutes); // added checkout routes 
 
 // Global error handler
 app.use((error, req, res, next) => {
