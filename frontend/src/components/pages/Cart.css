@@ -224,6 +224,52 @@
   border-radius: 8px;
 }
 
+.email-section {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.email-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.email-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.email-input:focus {
+  border-color: #007acc;
+  box-shadow: 0 0 0 3px rgba(0, 122, 204, 0.1);
+}
+
+.email-input.error {
+  border-color: #d32f2f;
+}
+
+.email-input.error:focus {
+  box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
+}
+
+.email-error {
+  color: #d32f2f;
+  font-size: 12px;
+  margin-top: 6px;
+  margin-bottom: 0;
+}
+
 .subtotal {
   display: flex;
   justify-content: space-between;

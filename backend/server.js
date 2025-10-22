@@ -14,6 +14,7 @@ const cartRoutes = require('./routes/cart');
 const orderRoutes = require('./routes/orders');
 const reviewRoutes = require('./routes/reviews');
 const uploadRoutes = require('./routes/upload');
+const checkoutRoutes = require('./routes/checkout');
 
 // Database connection
 const connectDB = require('./config/database');
@@ -80,6 +81,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/checkout', checkoutRoutes);
 
 // Global error handler
 app.use((error, req, res, next) => {

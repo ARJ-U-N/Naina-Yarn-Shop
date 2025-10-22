@@ -18,6 +18,8 @@ const Cart = () => {
   const [specialInstructions, setSpecialInstructions] = useState('')
   const [isCheckingOut, setIsCheckingOut] = useState(false)
   const [featuredProducts, setFeaturedProducts] = useState([])
+  const [customerEmail, setCustomerEmail] = useState('')
+  const [emailError, setEmailError] = useState('')
 
   // Fallback featured products
   const fallbackFeaturedProducts = [
@@ -82,13 +84,67 @@ const Cart = () => {
     updateQuantity(productId, newQuantity, selectedColor, selectedSize)
   }
 
-  // Enhanced checkout handler
-  const handleCheckout = () => {
+  
+  const handleCheckout = async () => {
+    if (cartItems.length === 0) {
+      alert('Your cart is empty!')
+      return
+    }
+
+   
+    const user = JSON.parse(localStorage.getItem('user') || '{}')
+    let emailForCheckout = user?.email || customerEmail
+
+   
+    if (!emailForCheckout || !emailForCheckout.includes('@')) {
+      setEmailError('Please enter a valid email address')
+      return
+    }
+
+    setEmailError('')
     setIsCheckingOut(true)
-    setTimeout(() => {
-      alert('Checkout functionality would be implemented here!')
+    
+    try {
+      
+      const checkoutItems = cartItems.map(item => ({
+        name: getSafeName(item),
+        price: getSafePrice(item),
+        quantity: item.quantity || 1,
+        image: getSafeImage(item),
+        description: `Size: ${item.selectedSize || 'N/A'}, Color: ${item.selectedColor || 'N/A'}`,
+        selectedSize: item.selectedSize,
+        selectedColor: item.selectedColor,
+      }))
+
+      
+      const response = await fetch('/api/checkout/create-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(localStorage.getItem('token') && {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          })
+        },
+        body: JSON.stringify({ 
+          cartItems: checkoutItems,
+          guestEmail: emailForCheckout 
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.success && data.url) {
+       
+        window.location.href = data.url
+      } else {
+        alert('Error creating checkout session: ' + (data.message || 'Unknown error'))
+        setIsCheckingOut(false)
+      }
+    } catch (error) {
+      console.error('Error during checkout:', error)
+      alert('Failed to proceed to checkout. Please try again.')
       setIsCheckingOut(false)
-    }, 1000)
+    }
   }
 
   // Helper function to get safe price value
@@ -308,6 +364,25 @@ const Cart = () => {
             </div>
 
             <div className="order-summary">
+              {/* Email Input for Guest Users */}
+              {!JSON.parse(localStorage.getItem('user') || '{}')?.email && (
+                <div className="email-section">
+                  <label className="email-label">📧 Email Address *</label>
+                  <input
+                    type="email"
+                    value={customerEmail}
+                    onChange={(e) => {
+                      setCustomerEmail(e.target.value)
+                      setEmailError('')
+                    }}
+                    placeholder="Enter your email for order confirmation"
+                    className={`email-input ${emailError ? 'error' : ''}`}
+                    required
+                  />
+                  {emailError && <p className="email-error">{emailError}</p>}
+                </div>
+              )}
+
               <div className="subtotal">
                 <span>Subtotal</span>
                 <span>Rs. {cartTotal.toLocaleString()}</span>
