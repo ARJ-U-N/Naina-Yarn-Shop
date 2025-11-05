@@ -107,12 +107,12 @@ const Header = () => {
           <Link to="/about" className={`nav-link ${location.pathname === '/about' ? 'active' : ''}`}>
             About
           </Link>
-          <a href="#" className="nav-link">Women</a>
+          {/*<a href="#" className="nav-link">Women</a>
           <a href="#" className="nav-link">Kids</a>
           <a href="#" className="nav-link">Decor</a>
           <a href="#" className="nav-link">Organizers</a>
           <a href="#" className="nav-link">Gifting</a>
-          <a href="#" className="nav-link">Clearance Sale</a>
+          <a href="#" className="nav-link">Clearance Sale</a>*/}
           
           {/* Mobile Login Section - Added at bottom of menu */}
           <div className="mobile-auth-section mobile-only">

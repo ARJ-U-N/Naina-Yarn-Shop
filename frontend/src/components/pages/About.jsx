@@ -20,20 +20,26 @@ const About = () => {
         <section className="story-section">
           <div className="story-content">
             <div className="story-text">
-              <h2>Our Story</h2>
+              <h2>My Story</h2>
               <p>
-                Nayher began as a mother's love story. What started as a passion for creating 
-                beautiful, handmade items for my own children has blossomed into a mission to 
-                bring comfort, joy, and warmth to families everywhere.
+                Hey, I'm Sherin Abdulrahiman
+                I'm the creator of Naina by Sherin. I'm a crochet and Amigurumi Artist, instructor, 
+                Digital Creator, Wife, Mom and a passionate Soul.
+                Creativity has always been important to me..
+                From the age of 13, I discovered crochet as a beloved hobby. Over the years,
+                 life’s journey—studying, marriage, raising children, and pursuing a profession—kept me busy. Yet,
+                  amidst it all, I always made time for my creative passions.
+                   Crochet has been my comfort during times of sadness and confusion;
+                    it’s more than just a craft—it's a form of therapy and a vital part of my life.
               </p>
               <p>
-                Every piece we create is made with the same care and attention I would give 
-                to items for my own little ones. From cozy baby blankets to adorable clothing 
-                sets, each product tells a story of love, craftsmanship, and dedication to quality.
+               With deep love and dedication, I am excited to introduce my creative collection,
+                "Rooh Hayati,"—a selection of beautifully crafted pieces infused with passion and soul.
+                 We also offer high-quality crochet yarns and craft supplies, proudly serving customers across the UAE.
               </p>
             </div>
             <div className="story-image">
-              <img src="https://www.shutterstock.com/image-photo/background-colorful-balls-wool-threads-600nw-2485028439.jpg" alt="Crafting process" />
+              <img src="2.jpg" alt="Crafting process" />
             </div>
           </div>
         </section>
@@ -112,13 +118,13 @@ const About = () => {
           <div className="mission-content">
             <h2>Our Mission</h2>
             <p>
-              To create beautiful, handcrafted items that bring comfort, warmth, and joy to families 
-              around the world. We believe every child deserves products made with love, care, and 
+              To create beautiful, handcrafted items that bring comfort, warmth, and joy to families
+              around the world. We believe every child deserves products made with love, care, and
               the highest quality materials.
             </p>
             <p>
-              Whether it's a cozy blanket for naptime, a special outfit for memorable moments, or 
-              unique accessories that spark imagination, Nayher is here to be part of your family's 
+              Whether it's a cozy blanket for naptime, a special outfit for memorable moments, or
+              unique accessories that spark imagination, Nayher is here to be part of your family's
               precious memories.
             </p>
           </div>
