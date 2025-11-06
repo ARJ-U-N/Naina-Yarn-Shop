@@ -32,7 +32,9 @@ app.use(cors({
   origin: process.env.NODE_ENV === 'production'
     ? [
         'https://www.roohhayati.com',
-        'https://naina-yarn-shop-wfob.vercel.app'
+        'https://naina-yarn-shop-wfob.vercel.app',
+        'https://admin.roohhayati.com'
+
       ]
     : [
         'http://localhost:3000',
