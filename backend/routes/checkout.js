@@ -158,7 +158,8 @@ router.get('/verify-payment', async (req, res) => {
         selectedSize: item.selectedSize
       }));
 
-      const order = await Order.create({
+      // Create the order
+      const order = new Order({
         user: user._id,
         items: orderItems,
         shippingAddress: {
@@ -182,6 +183,15 @@ router.get('/verify-payment', async (req, res) => {
         totalAmount: totalAmount,
         specialInstructions: 'Order placed via website'
       });
+
+      const date = new Date();
+      const year = date.getFullYear().toString().slice(-2);
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const random = Math.random().toString(36).substr(2, 6).toUpperCase();
+      order.orderNumber = `NYH${year}${month}${day}${random}`;
+
+      await order.save();
 
       console.log('✅ Order created:', order.orderNumber);
 
