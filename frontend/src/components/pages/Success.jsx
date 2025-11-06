@@ -22,7 +22,7 @@ const Success = () => {
    
     const verifyPayment = async () => {
       try {
-        const response = await fetch(`/api/checkout/verify-payment?session_id=${sessionId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/checkout/verify-payment?session_id=${sessionId}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
