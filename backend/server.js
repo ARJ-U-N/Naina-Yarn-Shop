@@ -29,10 +29,11 @@ app.use(helmet());
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
+  origin: process.env.NODE_ENV === 'production'
     ? [
         'https://www.roohhayati.com',
-      ] 
+        'https://naina-yarn-shop-wfob.vercel.app'
+      ]
     : [
         'http://localhost:3000',
         'http://localhost:3001',
