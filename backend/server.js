@@ -31,8 +31,7 @@ app.use(helmet());
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? [
-        'https://your-frontend-domain.vercel.app',
-        'https://your-admin-domain.vercel.app'
+        'https://www.roohhayati.com',
       ] 
     : [
         'http://localhost:3000',
