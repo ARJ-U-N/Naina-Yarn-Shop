@@ -8,13 +8,13 @@ export default defineConfig({
     port: 3000,  // ✅ Main frontend port
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://naina-yarn-shop-9nbt.vercel.app',
         changeOrigin: true,
         secure: false,
       },
       // ✅ Add this to proxy images from backend
       '/uploads': {
-        target: 'http://localhost:5000',
+        target: 'https://naina-yarn-shop-9nbt.vercel.app',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => {
