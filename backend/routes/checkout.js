@@ -52,7 +52,7 @@ router.post('/create-session', optionalAuth, async (req, res) => {
    
     const lineItems = cartItems.map(item => ({
       price_data: {
-        currency: 'aed', 
+        currency: 'aed', // change currency here
         product_data: {
           name: item.name,
           images: item.image ? [item.image] : [],
