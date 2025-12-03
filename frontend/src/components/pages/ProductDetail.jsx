@@ -25,7 +25,7 @@ const ProductDetail = () => {
   const fetchProduct = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`http://localhost:5000/api/products/${id}`)
+      const response = await fetch(`https://naina-yarn-shop-9nbt.vercel.app/api/products/${id}`)
       const data = await response.json()
 
       if (data.success) {
