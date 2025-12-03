@@ -31,7 +31,7 @@ const CustomerReviews = ({ productId }) => {
       setLoading(true)
       console.log('🔍 Fetching reviews for product:', productId)
       
-      const response = await fetch(`http://localhost:5000/api/reviews/product/${productId}`)
+      const response = await fetch(`https://naina-yarn-shop-9nbt.vercel.app/api/reviews/product/${productId}`)
       const data = await response.json()
       
       if (data.success) {
