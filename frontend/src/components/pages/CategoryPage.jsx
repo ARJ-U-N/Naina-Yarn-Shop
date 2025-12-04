@@ -480,7 +480,7 @@ const CategoryPage = () => {
                   <Link to={`/product/${product.id}`} className="product-name-link">
                     <h3 className="product-name">{product.name}</h3>
                   </Link>
-                  <p className="product-price">Rs. {product.price.toLocaleString()}</p>
+                  <p className="product-price">AED {product.price.toLocaleString()}</p>
                 </div>
                 
                 <button 
