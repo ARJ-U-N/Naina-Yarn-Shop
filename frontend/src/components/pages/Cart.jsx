@@ -241,7 +241,7 @@ const Cart = () => {
                   </div>
                   <div className="featured-info">
                     <h3>{product.name}</h3>
-                    <p className="featured-price">Rs. {product.price.toLocaleString()}</p>
+                    <p className="featured-price">AED {product.price.toLocaleString()}</p>
                   </div>
                 </Link>
               ))}
@@ -300,7 +300,7 @@ const Cart = () => {
                       <Link to={`/product/${itemId}`} className="product-name-link">
                         <h3>{itemName}</h3>
                       </Link>
-                      <p className="product-price">Rs. {itemPrice.toLocaleString()}</p>
+                      <p className="product-price">AED {itemPrice.toLocaleString()}</p>
                       {/* Show selected options if available */}
                       {item.selectedColor && <p className="selected-option">Color: {item.selectedColor}</p>}
                       {item.selectedSize && <p className="selected-option">Size: {item.selectedSize}</p>}
@@ -335,7 +335,7 @@ const Cart = () => {
                   </div>
 
                   <div className="cart-total">
-                    <span className="item-total">Rs. {(itemPrice * itemQuantity).toLocaleString()}</span>
+                    <span className="item-total">AED {(itemPrice * itemQuantity).toLocaleString()}</span>
                     <button 
                       onClick={() => removeFromCart(itemId, item.selectedColor, item.selectedSize)}
                       className="remove-btn"
@@ -385,7 +385,7 @@ const Cart = () => {
 
               <div className="subtotal">
                 <span>Subtotal</span>
-                <span>Rs. {cartTotal.toLocaleString()}</span>
+                <span>AED {cartTotal.toLocaleString()}</span>
               </div>
               <p className="shipping-note">
                 Taxes and <Link to="/shipping">shipping</Link> calculated at checkout
@@ -434,7 +434,7 @@ const Cart = () => {
                 </div>
                 <div className="featured-info">
                   <h3>{product.name}</h3>
-                  <p className="featured-price">Rs. {product.price.toLocaleString()}</p>
+                  <p className="featured-price">AED {product.price.toLocaleString()}</p>
                 </div>
               </Link>
             ))}

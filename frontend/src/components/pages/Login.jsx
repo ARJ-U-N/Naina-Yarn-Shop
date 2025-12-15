@@ -94,9 +94,7 @@ const Login = () => {
           </form>
 
           <div className="demo-credentials">
-            <p><strong>Demo Credentials:</strong></p>
-            <p>User: user@test.com / user123</p>
-            <p>Admin: admin@nayher.com / admin123</p>
+           
           </div>
         </div>
       </div>
