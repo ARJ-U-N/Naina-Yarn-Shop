@@ -55,7 +55,7 @@ const Header = () => {
           
           <Link to="/" className="logo">
             <img 
-              src="/1.png" 
+              src="/3.png" 
               alt="Nayher Logo" 
               className="logo-image"
             />

@@ -342,7 +342,7 @@ const ProductForm = () => {
               <div className="grid-3">
                 <div className="field-group">
                   <label className="field-label">
-                    Price (₹) *
+                    Price AED
                   </label>
                   <input
                     type="number"

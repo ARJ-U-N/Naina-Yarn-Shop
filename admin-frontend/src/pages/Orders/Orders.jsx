@@ -109,11 +109,11 @@ const Orders = () => {
           <div className="bg-white p-4 rounded-lg border">
             <div className="flex items-center">
               <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                <span className="text-green-600 font-bold">₹</span>
+                <span className="text-green-600 font-bold">AED</span>
               </div>
               <div className="ml-3">
                 <p className="text-sm text-gray-500">Total Revenue</p>
-                <p className="text-xl font-bold">₹{(data.summary.totalRevenue || 0).toLocaleString('en-IN')}</p>
+                <p className="text-xl font-bold">AED{(data.summary.totalRevenue || 0).toLocaleString('en-IN')}</p>
               </div>
             </div>
           </div>
