@@ -136,10 +136,15 @@ router.get('/verify-payment', async (req, res) => {
 
         user = await User.findOne({ email: session.customer_email });
         if (!user) {
+
+
+          const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+
           user = await User.create({
             name: 'Guest User',
             email: session.customer_email,
-            role: 'customer',
+            password: randomPassword,
+            role: 'user',
             isActive: true
           });
         }
