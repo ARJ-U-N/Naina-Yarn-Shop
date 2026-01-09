@@ -19,7 +19,58 @@ const Success = () => {
       return
     }
 
-   
+
+    const sendToFormspree = async (orderData) => {
+      try {
+        const formData = new FormData();
+        formData.append('email', orderData.email);
+        const messageBody = `
+          New Order Received! 
+          --------------------------------
+          Order Number: ${orderData.orderNumber}
+          Total Amount: ₹${orderData.totalAmount || orderData.amount}
+          Payment ID: ${orderData.paymentInfo?.transactionId || orderData.sessionId}
+          Date: ${new Date().toLocaleString()}
+
+          Customer Details:
+          --------------------------------
+          Name: ${orderData.shippingAddress?.name || 'N/A'}
+          Email: ${orderData.email}
+          Phone: ${orderData.shippingAddress?.phone || 'N/A'}
+          Address:
+          ${orderData.shippingAddress?.street || ''}
+          ${orderData.shippingAddress?.city || ''}, ${orderData.shippingAddress?.state || ''} ${orderData.shippingAddress?.zipCode || ''}
+          ${orderData.shippingAddress?.country || ''}
+
+          Ordered Items:
+          --------------------------------
+          ${orderData.items?.map(item => `
+          - Product: ${item.name}
+            Quantity: ${item.quantity}
+            Size: ${item.selectedSize || 'N/A'}
+            Color: ${item.selectedColor || 'N/A'}
+            Price: ₹${item.price}
+          `).join('') || 'No items found'}
+          
+          --------------------------------
+          Status: Paid
+        `;
+
+        formData.append('message', messageBody);
+
+        await fetch('https://formspree.io/f/xvzzpzpe', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        console.log('✅ Order details sent to owner via Formspree');
+      } catch (error) {
+        console.error('❌ Failed to send order email to owner:', error);
+      }
+    };
+
     const verifyPayment = async () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/checkout/verify-payment?session_id=${sessionId}`, {
@@ -34,22 +85,35 @@ const Success = () => {
         if (data.success && data.paymentStatus === 'paid') {
           console.log('✅ Payment verified successfully')
           setOrderStatus('success')
+          const fullOrderData = data.order || {
+            sessionId: sessionId,
+            amount: data.amount ? (data.amount / 100).toFixed(2) : 'N/A',
+            email: data.email || localStorage.getItem('user')?.email,
+            orderNumber: data.orderNumber,
+
+            items: [],
+            shippingAddress: {}
+          };
+
           setOrderDetails({
             sessionId: sessionId,
             amount: data.amount ? (data.amount / 100).toFixed(2) : 'N/A',
             email: data.email || localStorage.getItem('user')?.email,
             date: new Date().toLocaleDateString(),
+            orderNumber: data.orderNumber
           })
-          
-          
+
           clearCart()
-          
-          
+
           localStorage.setItem('lastOrder', JSON.stringify({
             sessionId: sessionId,
             timestamp: new Date().toISOString(),
             amount: data.amount,
           }))
+
+
+          await sendToFormspree(fullOrderData);
+
         } else {
           console.error('Payment not completed:', data)
           setOrderStatus('error')
@@ -95,7 +159,7 @@ const Success = () => {
           <h1>Payment Failed</h1>
           <p className="error-message">{error || 'There was an issue processing your order'}</p>
           <p className="error-note">Please try again or contact our support team</p>
-          
+
           <div className="action-buttons">
             <button onClick={handleContinueShopping} className="btn btn-primary">
               Back to Shopping
@@ -113,7 +177,7 @@ const Success = () => {
     <div className="success-page">
       <div className="success-container">
         <div className="success-icon">✅</div>
-        
+
         <h1>Thank You for Your Order!</h1>
         <p className="success-message">Your payment was successful</p>
 

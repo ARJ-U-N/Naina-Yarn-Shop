@@ -8,21 +8,21 @@ const User = require('../models/User');
 const optionalAuth = async (req, res, next) => {
   try {
     let token;
-    
+
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
     }
-    
+
     if (token) {
       const jwt = require('jsonwebtoken');
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const User = require('../models/User');
       req.user = await User.findById(decoded.id).select('-password');
     }
-    
+
     next();
   } catch (error) {
-    
+
     next();
   }
 };
@@ -49,16 +49,16 @@ router.post('/create-session', optionalAuth, async (req, res) => {
       });
     }
 
-   
+
     const lineItems = cartItems.map(item => ({
       price_data: {
-        currency: 'aed', // change currency here
+        currency: 'aed',
         product_data: {
           name: item.name,
           images: item.image ? [item.image] : [],
           description: item.description || `Size: ${item.selectedSize}, Color: ${item.selectedColor}`,
         },
-        unit_amount: Math.round(item.price * 100), 
+        unit_amount: Math.round(item.price * 100),
       },
       quantity: item.quantity || 1,
     }));
@@ -121,6 +121,7 @@ router.get('/verify-payment', async (req, res) => {
           paymentStatus: 'paid',
           amount: session.amount_total,
           email: session.customer_email,
+          order: existingOrder,
           orderId: existingOrder._id,
           orderNumber: existingOrder.orderNumber
         });
@@ -132,7 +133,7 @@ router.get('/verify-payment', async (req, res) => {
       if (userId && userId !== 'guest' && !userId.startsWith('guest-')) {
         user = await User.findById(userId);
       } else {
-      
+
         user = await User.findOne({ email: session.customer_email });
         if (!user) {
           user = await User.create({
@@ -146,11 +147,11 @@ router.get('/verify-payment', async (req, res) => {
 
       const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       const shippingCost = subtotal > 1000 ? 0 : 100;
-      const tax = Math.round(subtotal * 0.18); 
+      const tax = Math.round(subtotal * 0.18);
       const totalAmount = subtotal + shippingCost + tax;
 
       const orderItems = cartItems.map(item => ({
-        product: null, 
+        product: null,
         name: item.name,
         price: item.price,
         quantity: item.quantity,
@@ -201,6 +202,7 @@ router.get('/verify-payment', async (req, res) => {
         paymentStatus: 'paid',
         amount: session.amount_total,
         email: session.customer_email,
+        order: order, // Send full order details
         orderId: order._id,
         orderNumber: order.orderNumber,
         orderStatus: order.orderStatus
