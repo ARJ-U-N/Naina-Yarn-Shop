@@ -12,49 +12,55 @@ const Success = () => {
   const navigate = useNavigate()
   const sessionId = searchParams.get('session_id')
 
+
+  const hasVerified = React.useRef(false);
+
   useEffect(() => {
-    if (!sessionId) {
-      setOrderStatus('error')
-      setError('No session ID found')
-      return
+    if (!sessionId || hasVerified.current) {
+      if (!sessionId) {
+        setOrderStatus('error');
+        setError('No session ID found');
+      }
+      return;
     }
 
+    hasVerified.current = true;
 
     const sendToFormspree = async (orderData) => {
       try {
         const formData = new FormData();
         formData.append('email', orderData.email);
         const messageBody = `
-          New Order Received! 
-          --------------------------------
-          Order Number: ${orderData.orderNumber}
-          Total Amount: ₹${orderData.totalAmount || orderData.amount}
-          Payment ID: ${orderData.paymentInfo?.transactionId || orderData.sessionId}
-          Date: ${new Date().toLocaleString()}
-
-          Customer Details:
-          --------------------------------
-          Name: ${orderData.shippingAddress?.name || 'N/A'}
-          Email: ${orderData.email}
-          Phone: ${orderData.shippingAddress?.phone || 'N/A'}
-          Address:
-          ${orderData.shippingAddress?.street || ''}
-          ${orderData.shippingAddress?.city || ''}, ${orderData.shippingAddress?.state || ''} ${orderData.shippingAddress?.zipCode || ''}
-          ${orderData.shippingAddress?.country || ''}
-
-          Ordered Items:
-          --------------------------------
-          ${orderData.items?.map(item => `
-          - Product: ${item.name}
-            Quantity: ${item.quantity}
-            Size: ${item.selectedSize || 'N/A'}
-            Color: ${item.selectedColor || 'N/A'}
-            Price: ₹${item.price}
-          `).join('') || 'No items found'}
-          
-          --------------------------------
-          Status: Paid
-        `;
+            New Order Received! 
+            --------------------------------
+            Order Number: ${orderData.orderNumber}
+            Total Amount: ₹${orderData.totalAmount || orderData.amount}
+            Payment ID: ${orderData.paymentInfo?.transactionId || orderData.sessionId}
+            Date: ${new Date().toLocaleString()}
+  
+            Customer Details:
+            --------------------------------
+            Name: ${orderData.shippingAddress?.name || 'N/A'}
+            Email: ${orderData.email}
+            Phone: ${orderData.shippingAddress?.phone || 'N/A'}
+            Address:
+            ${orderData.shippingAddress?.street || ''}
+            ${orderData.shippingAddress?.city || ''}, ${orderData.shippingAddress?.state || ''} ${orderData.shippingAddress?.zipCode || ''}
+            ${orderData.shippingAddress?.country || ''}
+  
+            Ordered Items:
+            --------------------------------
+            ${orderData.items?.map(item => `
+            - Product: ${item.name}
+              Quantity: ${item.quantity}
+              Size: ${item.selectedSize || 'N/A'}
+              Color: ${item.selectedColor || 'N/A'}
+              Price: ₹${item.price}
+            `).join('') || 'No items found'}
+            
+            --------------------------------
+            Status: Paid
+          `;
 
         formData.append('message', messageBody);
 
@@ -127,7 +133,8 @@ const Success = () => {
     }
 
     verifyPayment()
-  }, [sessionId, clearCart])
+
+  }, [sessionId])
 
   const handleContinueShopping = () => {
     navigate('/')
