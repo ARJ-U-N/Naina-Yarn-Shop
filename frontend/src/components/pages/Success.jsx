@@ -91,20 +91,36 @@ const Success = () => {
         if (data.success && data.paymentStatus === 'paid') {
           console.log('✅ Payment verified successfully')
           setOrderStatus('success')
+
+
+          let userEmail = null;
+          try {
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+              userEmail = JSON.parse(userStr).email;
+            }
+          } catch (e) {
+            console.warn('Failed to parse user from localStorage', e);
+          }
+
+          const finalEmail = data.email || userEmail || 'guest@naina.com';
+
           const fullOrderData = data.order || {
             sessionId: sessionId,
             amount: data.amount ? (data.amount / 100).toFixed(2) : 'N/A',
-            email: data.email || localStorage.getItem('user')?.email,
+            email: finalEmail,
             orderNumber: data.orderNumber,
-
             items: [],
             shippingAddress: {}
           };
 
+
+          if (!fullOrderData.email) fullOrderData.email = finalEmail;
+
           setOrderDetails({
             sessionId: sessionId,
             amount: data.amount ? (data.amount / 100).toFixed(2) : 'N/A',
-            email: data.email || localStorage.getItem('user')?.email,
+            email: finalEmail,
             date: new Date().toLocaleDateString(),
             orderNumber: data.orderNumber
           })
