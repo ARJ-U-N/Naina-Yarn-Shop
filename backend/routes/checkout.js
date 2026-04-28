@@ -74,8 +74,8 @@ router.post('/create-session', optionalAuth, async (req, res) => {
       cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/cart`,
       metadata: {
         userId: req.user?._id?.toString() || 'guest',
-        cartItems: JSON.stringify(cartItems),
         customerEmail: customerEmail,
+        itemCount: String(cartItems.length),
       },
     });
 
@@ -108,7 +108,9 @@ router.get('/verify-payment', async (req, res) => {
       });
     }
 
-    const session = await stripe.checkout.sessions.retrieve(session_id);
+    const session = await stripe.checkout.sessions.retrieve(session_id, {
+      expand: ['line_items.data.price.product']
+    });
 
     if (session.payment_status === 'paid') {
       console.log('✅ Payment verified:', session_id);
@@ -127,7 +129,46 @@ router.get('/verify-payment', async (req, res) => {
         });
       }
 
-      const cartItems = JSON.parse(session.metadata.cartItems || '[]');
+      let lineItems = session.line_items?.data || [];
+      if (!lineItems.length) {
+        const fetchedLineItems = await stripe.checkout.sessions.listLineItems(session_id, {
+          limit: 100,
+          expand: ['data.price.product']
+        });
+        lineItems = fetchedLineItems.data || [];
+      }
+      const cartItems = lineItems.map((lineItem) => {
+        const quantity = lineItem.quantity || 1;
+        const product = lineItem.price?.product;
+        const productDescription = typeof product === 'object' ? product.description : '';
+
+        let selectedSize = null;
+        let selectedColor = null;
+
+        if (productDescription && productDescription.includes(',')) {
+          const parts = productDescription.split(',').map((part) => part.trim());
+          const sizePart = parts.find((part) => part.toLowerCase().startsWith('size:'));
+          const colorPart = parts.find((part) => part.toLowerCase().startsWith('color:'));
+
+          if (sizePart) {
+            const sizeValue = sizePart.split(':').slice(1).join(':').trim();
+            selectedSize = sizeValue && sizeValue !== 'N/A' ? sizeValue : null;
+          }
+
+          if (colorPart) {
+            const colorValue = colorPart.split(':').slice(1).join(':').trim();
+            selectedColor = colorValue || null;
+          }
+        }
+
+        return {
+          name: lineItem.description || 'Product',
+          price: ((lineItem.amount_subtotal || 0) / Math.max(quantity, 1)) / 100,
+          quantity,
+          selectedColor,
+          selectedSize
+        };
+      });
       const userId = session.metadata.userId;
       let user;
       if (userId && userId !== 'guest' && !userId.startsWith('guest-')) {
