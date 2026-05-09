@@ -20,6 +20,16 @@ const Cart = () => {
   const [featuredProducts, setFeaturedProducts] = useState([])
   const [customerEmail, setCustomerEmail] = useState('')
   const [emailError, setEmailError] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState('card')
+  const [shippingAddress, setShippingAddress] = useState({
+    street: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: ''
+  })
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [formErrors, setFormErrors] = useState({})
 
   // Fallback featured products
   const fallbackFeaturedProducts = [
@@ -85,27 +95,81 @@ const Cart = () => {
   }
 
   
+  const validateForm = () => {
+    const errors = {}
+    const user = JSON.parse(localStorage.getItem('user') || '{}')
+    const emailForCheckout = user?.email || customerEmail
+    if (!emailForCheckout || !emailForCheckout.includes('@')) {
+      errors.email = 'Please enter a valid email address'
+    }
+    if (!shippingAddress.street.trim()) errors.street = 'Street address is required'
+    if (!shippingAddress.city.trim()) errors.city = 'City is required'
+    if (!shippingAddress.state.trim()) errors.state = 'State is required'
+    if (!shippingAddress.zipCode.trim()) errors.zipCode = 'ZIP / PIN code is required'
+    if (!shippingAddress.country.trim()) errors.country = 'Country is required'
+    if (!phoneNumber.trim()) errors.phone = 'Phone number is required'
+    return errors
+  }
+
   const handleCheckout = async () => {
     if (cartItems.length === 0) {
       alert('Your cart is empty!')
       return
     }
 
-   
-    const user = JSON.parse(localStorage.getItem('user') || '{}')
-    let emailForCheckout = user?.email || customerEmail
-
-   
-    if (!emailForCheckout || !emailForCheckout.includes('@')) {
-      setEmailError('Please enter a valid email address')
+    const errors = validateForm()
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors)
+      if (errors.email) setEmailError(errors.email)
       return
     }
 
+    setFormErrors({})
     setEmailError('')
     setIsCheckingOut(true)
-    
+
+    const user = JSON.parse(localStorage.getItem('user') || '{}')
+    const emailForCheckout = user?.email || customerEmail
+
+    const fullShippingAddress = {
+      name: user?.name || 'Customer',
+      street: shippingAddress.street,
+      city: shippingAddress.city,
+      state: shippingAddress.state,
+      zipCode: shippingAddress.zipCode,
+      country: shippingAddress.country,
+      phone: phoneNumber
+    }
+
     try {
-      
+      // --- COD Flow ---
+      if (paymentMethod === 'cod') {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/orders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(localStorage.getItem('token') && {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            })
+          },
+          body: JSON.stringify({
+            shippingAddress: fullShippingAddress,
+            phone_number: phoneNumber,
+            payment_method: 'cod',
+            specialInstructions
+          })
+        })
+        const data = await response.json()
+        if (data.success) {
+          window.location.href = '/success?method=cod&order=' + data.data?.orderNumber
+        } else {
+          alert('Error placing order: ' + (data.message || 'Unknown error'))
+          setIsCheckingOut(false)
+        }
+        return
+      }
+
+      // --- Stripe Card Flow ---
       const checkoutItems = cartItems.map(item => ({
         name: getSafeName(item),
         price: getSafePrice(item),
@@ -116,7 +180,6 @@ const Cart = () => {
         selectedColor: item.selectedColor,
       }))
 
-      
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/checkout/create-session`, {
         method: 'POST',
         headers: {
@@ -125,16 +188,18 @@ const Cart = () => {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           })
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           cartItems: checkoutItems,
-          guestEmail: emailForCheckout 
+          guestEmail: emailForCheckout,
+          shippingAddress: fullShippingAddress,
+          phoneNumber,
+          specialInstructions
         }),
       })
 
       const data = await response.json()
 
       if (data.success && data.url) {
-       
         window.location.href = data.url
       } else {
         alert('Error creating checkout session: ' + (data.message || 'Unknown error'))
@@ -374,6 +439,7 @@ const Cart = () => {
                     onChange={(e) => {
                       setCustomerEmail(e.target.value)
                       setEmailError('')
+                      setFormErrors(prev => ({ ...prev, email: '' }))
                     }}
                     placeholder="Enter your email for order confirmation"
                     className={`email-input ${emailError ? 'error' : ''}`}
@@ -382,6 +448,132 @@ const Cart = () => {
                   {emailError && <p className="email-error">{emailError}</p>}
                 </div>
               )}
+
+              {/* Shipping Address */}
+              <div className="shipping-form-section">
+                <h3 className="shipping-form-title">📦 Shipping Address</h3>
+                <div className="shipping-form-grid">
+                  <div className="form-field full-width">
+                    <label>Street Address *</label>
+                    <input
+                      type="text"
+                      value={shippingAddress.street}
+                      onChange={(e) => {
+                        setShippingAddress(prev => ({ ...prev, street: e.target.value }))
+                        setFormErrors(prev => ({ ...prev, street: '' }))
+                      }}
+                      placeholder="123 Main St, Apt 4B"
+                      className={`checkout-field ${formErrors.street ? 'field-error' : ''}`}
+                    />
+                    {formErrors.street && <p className="field-error-msg">{formErrors.street}</p>}
+                  </div>
+                  <div className="form-field">
+                    <label>City *</label>
+                    <input
+                      type="text"
+                      value={shippingAddress.city}
+                      onChange={(e) => {
+                        setShippingAddress(prev => ({ ...prev, city: e.target.value }))
+                        setFormErrors(prev => ({ ...prev, city: '' }))
+                      }}
+                      placeholder="Dubai"
+                      className={`checkout-field ${formErrors.city ? 'field-error' : ''}`}
+                    />
+                    {formErrors.city && <p className="field-error-msg">{formErrors.city}</p>}
+                  </div>
+                  <div className="form-field">
+                    <label>State / Emirate *</label>
+                    <input
+                      type="text"
+                      value={shippingAddress.state}
+                      onChange={(e) => {
+                        setShippingAddress(prev => ({ ...prev, state: e.target.value }))
+                        setFormErrors(prev => ({ ...prev, state: '' }))
+                      }}
+                      placeholder="Dubai"
+                      className={`checkout-field ${formErrors.state ? 'field-error' : ''}`}
+                    />
+                    {formErrors.state && <p className="field-error-msg">{formErrors.state}</p>}
+                  </div>
+                  <div className="form-field">
+                    <label>ZIP / PIN Code *</label>
+                    <input
+                      type="text"
+                      value={shippingAddress.zipCode}
+                      onChange={(e) => {
+                        setShippingAddress(prev => ({ ...prev, zipCode: e.target.value }))
+                        setFormErrors(prev => ({ ...prev, zipCode: '' }))
+                      }}
+                      placeholder="00000"
+                      className={`checkout-field ${formErrors.zipCode ? 'field-error' : ''}`}
+                    />
+                    {formErrors.zipCode && <p className="field-error-msg">{formErrors.zipCode}</p>}
+                  </div>
+                  <div className="form-field full-width">
+                    <label>Country *</label>
+                    <input
+                      type="text"
+                      value={shippingAddress.country}
+                      onChange={(e) => {
+                        setShippingAddress(prev => ({ ...prev, country: e.target.value }))
+                        setFormErrors(prev => ({ ...prev, country: '' }))
+                      }}
+                      placeholder="United Arab Emirates"
+                      className={`checkout-field ${formErrors.country ? 'field-error' : ''}`}
+                    />
+                    {formErrors.country && <p className="field-error-msg">{formErrors.country}</p>}
+                  </div>
+                  <div className="form-field full-width">
+                    <label>📞 Phone Number *</label>
+                    <input
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={(e) => {
+                        setPhoneNumber(e.target.value)
+                        setFormErrors(prev => ({ ...prev, phone: '' }))
+                      }}
+                      placeholder="+971 50 000 0000"
+                      className={`checkout-field ${formErrors.phone ? 'field-error' : ''}`}
+                    />
+                    {formErrors.phone && <p className="field-error-msg">{formErrors.phone}</p>}
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Method */}
+              <div className="payment-method-section">
+                <h3 className="payment-method-title">💳 Payment Method</h3>
+                <div className="payment-options">
+                  <label className={`payment-option ${paymentMethod === 'card' ? 'selected' : ''}`}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="card"
+                      checked={paymentMethod === 'card'}
+                      onChange={() => setPaymentMethod('card')}
+                    />
+                    <span className="payment-option-icon">💳</span>
+                    <div>
+                      <span className="payment-option-label">Pay with Card (Stripe)</span>
+                      <span className="payment-option-desc">Secure online payment via Stripe</span>
+                    </div>
+                  </label>
+                  <label className={`payment-option ${paymentMethod === 'cod' ? 'selected' : ''}`}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="cod"
+                      checked={paymentMethod === 'cod'}
+                      onChange={() => setPaymentMethod('cod')}
+                    />
+                    <span className="payment-option-icon">🚚</span>
+                    <div>
+                      <span className="payment-option-label">Cash on Delivery (COD)</span>
+                      <span className="payment-option-desc">Pay when your order arrives</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
 
               <div className="subtotal">
                 <span>Subtotal</span>
@@ -395,7 +587,13 @@ const Cart = () => {
                 onClick={handleCheckout}
                 disabled={isCheckingOut || loading || cartItems.length === 0}
               >
-                {isCheckingOut ? 'Processing...' : loading ? 'Updating...' : 'Check out'}
+                {isCheckingOut
+                  ? 'Processing...'
+                  : loading
+                  ? 'Updating...'
+                  : paymentMethod === 'cod'
+                  ? '🚚 Place COD Order'
+                  : '💳 Proceed to Payment'}
               </button>
               
               {/* Clear Cart Button */}

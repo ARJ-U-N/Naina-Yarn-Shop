@@ -30,7 +30,7 @@ const optionalAuth = async (req, res, next) => {
 
 router.post('/create-session', optionalAuth, async (req, res) => {
   try {
-    const { cartItems, email, guestEmail } = req.body;
+    const { cartItems, email, guestEmail, shippingAddress, phoneNumber, specialInstructions } = req.body;
 
     if (!cartItems || cartItems.length === 0) {
       return res.status(400).json({
@@ -38,7 +38,6 @@ router.post('/create-session', optionalAuth, async (req, res) => {
         message: 'Cart is empty'
       });
     }
-
 
     const customerEmail = req.user?.email || guestEmail || email;
 
@@ -48,7 +47,6 @@ router.post('/create-session', optionalAuth, async (req, res) => {
         message: 'Email is required for checkout'
       });
     }
-
 
     const lineItems = cartItems.map(item => ({
       price_data: {
@@ -63,7 +61,7 @@ router.post('/create-session', optionalAuth, async (req, res) => {
       quantity: item.quantity || 1,
     }));
 
-
+    // Stripe metadata values must be strings
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
@@ -76,6 +74,15 @@ router.post('/create-session', optionalAuth, async (req, res) => {
         userId: req.user?._id?.toString() || 'guest',
         customerEmail: customerEmail,
         itemCount: String(cartItems.length),
+        // Shipping details threaded through so verify-payment can use real data
+        shippingName:    shippingAddress?.name    || '',
+        shippingStreet:  shippingAddress?.street  || '',
+        shippingCity:    shippingAddress?.city    || '',
+        shippingState:   shippingAddress?.state   || '',
+        shippingZip:     shippingAddress?.zipCode || '',
+        shippingCountry: shippingAddress?.country || '',
+        shippingPhone:   phoneNumber              || shippingAddress?.phone || '',
+        specialInstructions: specialInstructions  || ''
       },
     });
 
@@ -205,19 +212,23 @@ router.get('/verify-payment', async (req, res) => {
         selectedSize: item.selectedSize
       }));
 
+      // Build shipping address from metadata (real data passed from frontend)
+      const meta = session.metadata || {};
+      const resolvedShippingAddress = {
+        name:    meta.shippingName    || user.name || 'Customer',
+        street:  meta.shippingStreet  || '',
+        city:    meta.shippingCity    || '',
+        state:   meta.shippingState   || '',
+        zipCode: meta.shippingZip     || '',
+        country: meta.shippingCountry || '',
+        phone:   meta.shippingPhone   || user.phone || ''
+      };
+
       // Create the order
       const order = new Order({
         user: user._id,
         items: orderItems,
-        shippingAddress: {
-          name: user.name,
-          street: 'To be updated',
-          city: 'To be updated',
-          state: 'To be updated',
-          zipCode: '000000',
-          country: 'India',
-          phone: user.phone || 'To be updated'
-        },
+        shippingAddress: resolvedShippingAddress,
         paymentInfo: {
           method: 'card',
           status: 'completed',
@@ -228,7 +239,7 @@ router.get('/verify-payment', async (req, res) => {
         shippingCost: shippingCost,
         tax: tax,
         totalAmount: totalAmount,
-        specialInstructions: 'Order placed via website'
+        specialInstructions: meta.specialInstructions || 'Order placed via Stripe'
       });
 
       const date = new Date();

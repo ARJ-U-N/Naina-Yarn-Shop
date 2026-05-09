@@ -36,8 +36,8 @@ exports.createOrder = async (req, res) => {
 
     // Calculate totals
     const subtotal = cart.totalAmount;
-    const shippingCost = subtotal > 1000 ? 0 : 50; // Free shipping over ₹1000
-    const tax = Math.round(subtotal * 0.18); // 18% GST
+    const shippingCost = subtotal > 1000 ? 0 : 50; // Free shipping over AED 1000
+    const tax = 0; // No additional tax (price is inclusive)
     const totalAmount = subtotal + shippingCost + tax;
 
     // Create order
@@ -54,7 +54,7 @@ exports.createOrder = async (req, res) => {
       shippingAddress,
       paymentInfo: {
         method: paymentMethod,
-        status: paymentMethod === 'cod' ? 'pending' : 'pending'
+        status: paymentMethod === 'cod' ? 'pending' : 'completed'
       },
       subtotal,
       shippingCost,

@@ -201,7 +201,7 @@ const Reviews = () => {
                         <p className="font-medium text-gray-900">
                           {review.product?.name || 'Product'}
                         </p>
-                        <p className="text-xs">₹{review.product?.price?.toLocaleString('en-IN')}</p>
+                        <p className="text-xs">AED {review.product?.price?.toLocaleString('en-AE')}</p>
                       </div>
                     </div>
 

@@ -568,3 +568,142 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ── Shipping Form ── */
+.shipping-form-section {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.shipping-form-title,
+.payment-method-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 14px 0;
+}
+
+.shipping-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-field.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+}
+
+.checkout-field {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+  background: #fff;
+}
+
+.checkout-field:focus {
+  border-color: #d4af37;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+}
+
+.checkout-field.field-error {
+  border-color: #d32f2f;
+}
+
+.checkout-field.field-error:focus {
+  box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
+}
+
+.field-error-msg {
+  color: #d32f2f;
+  font-size: 11px;
+  margin: 0;
+}
+
+/* ── Payment Method ── */
+.payment-method-section {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.payment-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.payment-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 2px solid #e5e5e5;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  background: #fff;
+}
+
+.payment-option:hover {
+  border-color: #d4af37;
+  background: #fdfaf0;
+}
+
+.payment-option.selected {
+  border-color: #d4af37;
+  background: #fdfaf0;
+}
+
+.payment-option input[type="radio"] {
+  display: none;
+}
+
+.payment-option-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.payment-option div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.payment-option-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.payment-option-desc {
+  font-size: 12px;
+  color: #888;
+}
+
+@media (max-width: 480px) {
+  .shipping-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-field.full-width {
+    grid-column: 1;
+  }
+}

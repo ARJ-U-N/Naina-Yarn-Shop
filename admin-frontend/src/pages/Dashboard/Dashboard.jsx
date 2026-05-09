@@ -31,7 +31,7 @@ const Dashboard = () => {
     },
     {
       name: 'Total Revenue',
-      value: `₹${(ordersData?.summary?.totalRevenue || 0).toLocaleString('en-IN')}`,
+      value: `AED ${(ordersData?.summary?.totalRevenue || 0).toLocaleString('en-AE')}`,
       icon: TrendingUp,
       color: 'bg-green-500',
       textColor: 'text-green-600',

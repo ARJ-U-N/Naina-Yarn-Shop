@@ -131,7 +131,7 @@ const OrderDetails = () => {
               Order #{orderData.orderNumber}
             </h1>
             <p className="text-sm text-gray-500">
-              Placed on {new Date(orderData.createdAt).toLocaleDateString('en-IN', {
+              Placed on {new Date(orderData.createdAt).toLocaleDateString('en-AE', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
@@ -311,14 +311,14 @@ const OrderDetails = () => {
                       <h4 className="font-medium text-gray-900">{item.name}</h4>
                       <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
                         <span>Qty: {item.quantity}</span>
-                        <span>Price: ₹{item.price.toLocaleString('en-IN')}</span>
+                        <span>Price: AED {item.price.toLocaleString('en-AE')}</span>
                         {item.selectedColor && <span>Color: {item.selectedColor}</span>}
                         {item.selectedSize && <span>Size: {item.selectedSize}</span>}
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="font-semibold">
-                        ₹{(item.price * item.quantity).toLocaleString('en-IN')}
+                        AED {(item.price * item.quantity).toLocaleString('en-AE')}
                       </p>
                     </div>
                   </div>
@@ -339,20 +339,20 @@ const OrderDetails = () => {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
-                  <span>₹{orderData.subtotal.toLocaleString('en-IN')}</span>
+                  <span>AED {orderData.subtotal.toLocaleString('en-AE')}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping:</span>
-                  <span>₹{orderData.shippingCost.toLocaleString('en-IN')}</span>
+                  <span>AED {orderData.shippingCost.toLocaleString('en-AE')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Tax (GST):</span>
-                  <span>₹{orderData.tax.toLocaleString('en-IN')}</span>
+                  <span>Tax:</span>
+                  <span>AED {orderData.tax.toLocaleString('en-AE')}</span>
                 </div>
                 <div className="border-t pt-3">
                   <div className="flex justify-between text-lg font-semibold">
                     <span>Total:</span>
-                    <span>₹{orderData.totalAmount.toLocaleString('en-IN')}</span>
+                    <span>AED {orderData.totalAmount.toLocaleString('en-AE')}</span>
                   </div>
                 </div>
               </div>

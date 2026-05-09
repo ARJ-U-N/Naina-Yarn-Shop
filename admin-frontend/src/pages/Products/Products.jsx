@@ -140,7 +140,7 @@ const Products = () => {
           
           <div className="product-info">
             <div className="price-info">
-              <p className="product-price">₹{product.price.toLocaleString('en-IN')}</p>
+              <p className="product-price">AED {product.price.toLocaleString('en-AE')}</p>
               <p className="product-stock">Stock: {product.stock}</p>
             </div>
             <div className="rating-info">
@@ -208,7 +208,7 @@ const Products = () => {
           </span>
         </td>
         <td className="price-cell">
-          <span className="price-text">₹{product.price.toLocaleString('en-IN')}</span>
+          <span className="price-text">AED {product.price.toLocaleString('en-AE')}</span>
         </td>
         <td className="stock-cell">
           <span className={`stock-text ${product.stock < 10 ? 'stock-low' : ''}`}>

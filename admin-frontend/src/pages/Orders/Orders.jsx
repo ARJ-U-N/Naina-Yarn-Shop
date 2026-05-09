@@ -223,7 +223,7 @@ const Orders = () => {
                         </span>
                       </td>
                       <td>
-                        <span className="font-semibold">₹{order.totalAmount.toLocaleString('en-IN')}</span>
+                        <span className="font-semibold">AED {order.totalAmount.toLocaleString('en-AE')}</span>
                       </td>
                       <td>
                         <select
