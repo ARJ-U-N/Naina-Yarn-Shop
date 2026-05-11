@@ -280,4 +280,113 @@ router.get('/verify-payment', async (req, res) => {
   }
 });
 
+router.post('/cod', optionalAuth, async (req, res) => {
+  try {
+    const { cartItems, email, guestEmail, shippingAddress, phoneNumber, specialInstructions } = req.body;
+
+    if (!cartItems || cartItems.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cart is empty'
+      });
+    }
+
+    const customerEmail = req.user?.email || guestEmail || email;
+
+    if (!customerEmail) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required for checkout'
+      });
+    }
+
+    let user;
+    if (req.user) {
+      user = req.user;
+    } else {
+      user = await User.findOne({ email: customerEmail });
+      if (!user) {
+        const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+        user = await User.create({
+          name: shippingAddress?.name || 'Guest User',
+          email: customerEmail,
+          password: randomPassword,
+          role: 'user',
+          isActive: true
+        });
+      }
+    }
+
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const shippingCost = subtotal > 1000 ? 0 : 100;
+    const tax = Math.round(subtotal * 0.18);
+    const totalAmount = subtotal + shippingCost + tax;
+
+    const orderItems = cartItems.map(item => ({
+      product: item.id || item._id || null,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      selectedColor: item.selectedColor,
+      selectedSize: item.selectedSize
+    }));
+
+    const order = new Order({
+      user: user._id,
+      items: orderItems,
+      shippingAddress: {
+        name:    shippingAddress?.name    || user.name || 'Customer',
+        street:  shippingAddress?.street  || '',
+        city:    shippingAddress?.city    || '',
+        state:   shippingAddress?.state   || '',
+        zipCode: shippingAddress?.zipCode || '',
+        country: shippingAddress?.country || '',
+        phone:   phoneNumber              || shippingAddress?.phone || user.phone || ''
+      },
+      paymentInfo: {
+        method: 'cod',
+        status: 'pending',
+        transactionId: 'cod-' + Date.now()
+      },
+      orderStatus: 'confirmed',
+      subtotal: subtotal,
+      shippingCost: shippingCost,
+      tax: tax,
+      totalAmount: totalAmount,
+      specialInstructions: specialInstructions || 'Order placed via Cash on Delivery'
+    });
+
+    const date = new Date();
+    const year = date.getFullYear().toString().slice(-2);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const random = Math.random().toString(36).substr(2, 6).toUpperCase();
+    order.orderNumber = `NYH${year}${month}${day}${random}`;
+
+    await order.save();
+
+    if (req.user) {
+      const Cart = require('../models/Cart');
+      await Cart.findOneAndUpdate(
+        { user: req.user._id },
+        { items: [], totalAmount: 0, totalItems: 0 }
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Order created successfully (COD)',
+      order: order,
+      orderId: order._id,
+      orderNumber: order.orderNumber
+    });
+  } catch (error) {
+    console.error('❌ Error creating COD order:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to create order'
+    });
+  }
+});
+
 module.exports = router;

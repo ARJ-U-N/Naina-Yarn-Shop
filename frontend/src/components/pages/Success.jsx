@@ -11,11 +11,68 @@ const Success = () => {
   const { clearCart } = useCart()
   const navigate = useNavigate()
   const sessionId = searchParams.get('session_id')
-
+  const method = searchParams.get('method')
+  const orderNumber = searchParams.get('order')
+  const amount = searchParams.get('amount')
 
   const hasVerified = React.useRef(false);
 
   useEffect(() => {
+    if (method === 'cod') {
+      if (hasVerified.current) return;
+      hasVerified.current = true;
+
+      let userEmail = 'guest@naina.com';
+      try {
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          userEmail = JSON.parse(userStr).email;
+        }
+      } catch (e) {
+        console.warn('Failed to parse user from localStorage', e);
+      }
+
+      setOrderStatus('success');
+      setOrderDetails({
+        sessionId: orderNumber,
+        amount: amount || 'N/A',
+        email: userEmail,
+        date: new Date().toLocaleDateString(),
+        orderNumber: orderNumber
+      });
+
+      const sendCodEmail = async () => {
+        try {
+          const formData = new FormData();
+          formData.append('email', userEmail);
+          const messageBody = `
+              New COD Order Received! 
+              --------------------------------
+              Order Number: ${orderNumber}
+              Total Amount: ₹${amount || 'N/A'}
+              Payment Method: COD
+              Date: ${new Date().toLocaleString()}
+              Email: ${userEmail}
+            `;
+
+          formData.append('message', messageBody);
+
+          await fetch('https://formspree.io/f/xvzzpzpe', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+        } catch (error) {
+          console.error('❌ Failed to send order email to owner:', error);
+        }
+      };
+
+      sendCodEmail();
+      return;
+    }
+
     if (!sessionId || hasVerified.current) {
       if (!sessionId) {
         setOrderStatus('error');

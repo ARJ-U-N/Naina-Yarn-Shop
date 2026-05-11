@@ -142,9 +142,19 @@ const Cart = () => {
     }
 
     try {
-      // --- COD Flow ---
       if (paymentMethod === 'cod') {
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/orders`, {
+        const checkoutItems = cartItems.map(item => ({
+          name: getSafeName(item),
+          price: getSafePrice(item),
+          quantity: item.quantity || 1,
+          image: getSafeImage(item),
+          description: `Size: ${item.selectedSize || 'N/A'}, Color: ${item.selectedColor || 'N/A'}`,
+          selectedSize: item.selectedSize,
+          selectedColor: item.selectedColor,
+          id: getSafeId(item)
+        }))
+
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/checkout/cod`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -153,15 +163,17 @@ const Cart = () => {
             })
           },
           body: JSON.stringify({
+            cartItems: checkoutItems,
+            guestEmail: emailForCheckout,
             shippingAddress: fullShippingAddress,
-            phone_number: phoneNumber,
-            payment_method: 'cod',
+            phoneNumber,
             specialInstructions
           })
         })
         const data = await response.json()
         if (data.success) {
-          window.location.href = '/success?method=cod&order=' + data.data?.orderNumber
+          clearCart()
+          window.location.href = `/success?method=cod&order=${data.orderNumber}&amount=${data.order?.totalAmount}`
         } else {
           alert('Error placing order: ' + (data.message || 'Unknown error'))
           setIsCheckingOut(false)
