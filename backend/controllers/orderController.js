@@ -36,9 +36,9 @@ exports.createOrder = async (req, res) => {
 
     // Calculate totals
     const subtotal = cart.totalAmount;
-    const shippingCost = subtotal > 1000 ? 0 : 50; // Free shipping over AED 1000
-    const tax = 0; // No additional tax (price is inclusive)
-    const totalAmount = subtotal + shippingCost + tax;
+    const shippingCost = 10; // Flat 10 AED shipping fee
+    const tax = 0; // No additional tax
+    const totalAmount = subtotal + shippingCost;
 
     // Create order
     const order = await Order.create({

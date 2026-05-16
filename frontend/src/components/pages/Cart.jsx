@@ -591,9 +591,14 @@ const Cart = () => {
                 <span>Subtotal</span>
                 <span>AED {cartTotal.toLocaleString()}</span>
               </div>
-              <p className="shipping-note">
-                Taxes and <Link to="/shipping">shipping</Link> calculated at checkout
-              </p>
+              <div className="subtotal">
+                <span>Shipping</span>
+                <span>10 AED</span>
+              </div>
+              <div className="subtotal" style={{ fontWeight: '700', borderTop: '1px solid #e5e7eb', paddingTop: '10px', marginTop: '4px' }}>
+                <span>Total</span>
+                <span>AED {(cartTotal + 10).toLocaleString()}</span>
+              </div>
               <button 
                 className="checkout-btn"
                 onClick={handleCheckout}

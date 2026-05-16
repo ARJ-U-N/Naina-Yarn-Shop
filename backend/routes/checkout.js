@@ -61,6 +61,19 @@ router.post('/create-session', optionalAuth, async (req, res) => {
       quantity: item.quantity || 1,
     }));
 
+    // Add flat 10 AED shipping fee as a separate Stripe line item
+    lineItems.push({
+      price_data: {
+        currency: 'aed',
+        product_data: {
+          name: 'Shipping',
+          description: 'Flat rate shipping fee',
+        },
+        unit_amount: 1000, // 10 AED in fils (smallest currency unit)
+      },
+      quantity: 1,
+    });
+
     // Stripe metadata values must be strings
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -199,9 +212,9 @@ router.get('/verify-payment', async (req, res) => {
       }
 
       const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      const shippingCost = subtotal > 1000 ? 0 : 100;
-      const tax = Math.round(subtotal * 0.18);
-      const totalAmount = subtotal + shippingCost + tax;
+      const shippingCost = 10; // Flat 10 AED shipping fee
+      const tax = 0; // No additional tax
+      const totalAmount = subtotal + shippingCost;
 
       const orderItems = cartItems.map(item => ({
         product: null,
@@ -318,9 +331,9 @@ router.post('/cod', optionalAuth, async (req, res) => {
     }
 
     const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const shippingCost = subtotal > 1000 ? 0 : 100;
-    const tax = Math.round(subtotal * 0.18);
-    const totalAmount = subtotal + shippingCost + tax;
+    const shippingCost = 10; // Flat 10 AED shipping fee
+    const tax = 0; // No additional tax
+    const totalAmount = subtotal + shippingCost;
 
     const orderItems = cartItems.map(item => ({
       product: item.id || item._id || null,

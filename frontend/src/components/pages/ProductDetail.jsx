@@ -244,6 +244,48 @@ const ProductDetail = () => {
               <button className="buy-now-btn" disabled={isOutOfStock}>
                 Buy it now
               </button>
+
+              <button
+                className="share-product-btn"
+                onClick={async () => {
+                  const productUrl = window.location.href
+                  if (navigator.share) {
+                    try {
+                      await navigator.share({ title: product.name, url: productUrl })
+                    } catch (err) {
+                      if (err.name !== 'AbortError') console.error('Share failed', err)
+                    }
+                  } else {
+                    try {
+                      await navigator.clipboard.writeText(productUrl)
+                      const toast = document.createElement('div')
+                      toast.textContent = 'Link copied!'
+                      Object.assign(toast.style, {
+                        position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)',
+                        background: '#333', color: '#fff', padding: '10px 20px', borderRadius: '8px',
+                        fontSize: '14px', zIndex: '9999', opacity: '0', transition: 'opacity 0.3s'
+                      })
+                      document.body.appendChild(toast)
+                      requestAnimationFrame(() => { toast.style.opacity = '1' })
+                      setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300) }, 2000)
+                    } catch (err) {
+                      alert('Link copied: ' + productUrl)
+                    }
+                  }
+                }}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                  width: '100%', padding: '12px', background: 'none',
+                  border: '1px solid #ccc', borderRadius: '8px', cursor: 'pointer',
+                  fontSize: '14px', fontWeight: '500', color: '#333'
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                </svg>
+                Share
+              </button>
             </div>
 
             {/* Product Description */}

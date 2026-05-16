@@ -49,7 +49,7 @@ const Success = () => {
               New COD Order Received! 
               --------------------------------
               Order Number: ${orderNumber}
-              Total Amount: ₹${amount || 'N/A'}
+              Total Amount: AED ${amount || 'N/A'}
               Payment Method: COD
               Date: ${new Date().toLocaleString()}
               Email: ${userEmail}
@@ -91,7 +91,7 @@ const Success = () => {
             New Order Received! 
             --------------------------------
             Order Number: ${orderData.orderNumber}
-            Total Amount: ₹${orderData.totalAmount || orderData.amount}
+            Total Amount: AED ${orderData.totalAmount || orderData.amount}
             Payment ID: ${orderData.paymentInfo?.transactionId || orderData.sessionId}
             Date: ${new Date().toLocaleString()}
   
@@ -112,7 +112,7 @@ const Success = () => {
               Quantity: ${item.quantity}
               Size: ${item.selectedSize || 'N/A'}
               Color: ${item.selectedColor || 'N/A'}
-              Price: ₹${item.price}
+              Price: AED ${item.price}
             `).join('') || 'No items found'}
             
             --------------------------------
@@ -269,7 +269,7 @@ const Success = () => {
             </div>
             <div className="detail-item">
               <span className="detail-label">Amount:</span>
-              <span className="detail-value">₹{orderDetails.amount}</span>
+              <span className="detail-value">AED {orderDetails.amount}</span>
             </div>
             <div className="detail-item">
               <span className="detail-label">Email:</span>

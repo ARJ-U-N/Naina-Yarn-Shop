@@ -345,10 +345,6 @@ const OrderDetails = () => {
                   <span>Shipping:</span>
                   <span>AED {orderData.shippingCost.toLocaleString('en-AE')}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Tax:</span>
-                  <span>AED {orderData.tax.toLocaleString('en-AE')}</span>
-                </div>
                 <div className="border-t pt-3">
                   <div className="flex justify-between text-lg font-semibold">
                     <span>Total:</span>
